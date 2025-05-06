@@ -12,7 +12,7 @@ import java.util.List;
 
 public class EmployeeDAO {
 
-    private final String SCHEMA = "employees";
+    private final String TABLE = "employees";
     private final DatabaseConnector connector;
 
     public EmployeeDAO(DatabaseConnector connector) {
@@ -20,7 +20,7 @@ public class EmployeeDAO {
     }
 
     public Employee findById(int id) {
-        String query = "SELECT id, name, age, position, salary FROM `" + SCHEMA + "` WHERE id = ?";
+        String query = "SELECT id, name, age, position, salary FROM `" + TABLE + "` WHERE id = ?";
         Employee employee = null;
         try (PreparedStatement pstmt = connector.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, id);
@@ -40,7 +40,7 @@ public class EmployeeDAO {
     }
 
     public List<Employee> findAll() {
-        String query = "SELECT id, name, age, position, salary FROM `" + SCHEMA + "`";
+        String query = "SELECT id, name, age, position, salary FROM `" + TABLE + "`";
         List<Employee> result = new ArrayList<>();
         try (Statement stmt = connector.getConnection().createStatement()) {
             ResultSet resultSet = stmt.executeQuery(query);
@@ -55,12 +55,13 @@ public class EmployeeDAO {
                 result.add(employee);
             }
         } catch (SQLException e) {
-            System.out.println("SQL Error: " + e.getMessage());        }
+            System.out.println("SQL Error: " + e.getMessage());
+        }
         return result;
     }
 
-    public Employee create(Employee employee) {
-        String query = "INSERT INTO `" + SCHEMA + "` (name, age, position, salary) VALUES (?, ?, ?, ?)";
+    public boolean create(Employee employee) {
+        String query = "INSERT INTO `" + TABLE + "` (name, age, position, salary) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = connector.getConnection().prepareStatement(query)) {
             pstmt.setString(1, employee.getName());
             pstmt.setInt(2, employee.getAge());
@@ -71,20 +72,23 @@ public class EmployeeDAO {
                 ResultSet resultSet = stmt.executeQuery("SELECT @@IDENTITY as id");
                 resultSet.next();
                 employee.setId(resultSet.getInt("id"));
+                return true;
             }
         } catch (SQLException e) {
-            System.out.println("SQL Error: " + e.getMessage());        }
-        return employee;
+            System.out.println("SQL Error: " + e.getMessage());
+        }
+        return false;
     }
 
     public boolean delete(Employee employee) {
-        String query = "DELETE FROM `" + SCHEMA + "` WHERE id = ?";
+        String query = "DELETE FROM `" + TABLE + "` WHERE id = ?";
         try (PreparedStatement pstmt = connector.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, employee.getId());
             pstmt.execute();
             return true;
         } catch (SQLException e) {
-            System.out.println("SQL Error: " + e.getMessage());        }
+            System.out.println("SQL Error: " + e.getMessage());
+        }
         return false;
     }
 
@@ -92,7 +96,7 @@ public class EmployeeDAO {
         if (findById(employee.getId()) == null) {
             return false;
         }
-        String query = "UPDATE `" + SCHEMA + "` SET name = ?, age = ?, position = ?, salary = ? WHERE id = ?";
+        String query = "UPDATE `" + TABLE + "` SET name = ?, age = ?, position = ?, salary = ? WHERE id = ?";
         try (PreparedStatement pstmt = connector.getConnection().prepareStatement(query)) {
             pstmt.setString(1, employee.getName());
             pstmt.setInt(2, employee.getAge());
@@ -102,7 +106,8 @@ public class EmployeeDAO {
             pstmt.execute();
             return true;
         } catch (SQLException e) {
-            System.out.println("SQL Error: " + e.getMessage());        }
+            System.out.println("SQL Error: " + e.getMessage());
+        }
         return false;
     }
 }

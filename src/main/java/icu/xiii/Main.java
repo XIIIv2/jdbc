@@ -26,8 +26,7 @@ public class Main {
 
         getOutput("Create new employee");
         employee = new Employee("Carl", 25, "Seller", 1000);
-        employee = employeeDAO.create(employee);
-        if (employee.getId() != 0) {
+        if (employeeDAO.create(employee)) {
             getOutput("Created!");
             getOutput(employee.toString());
         }
