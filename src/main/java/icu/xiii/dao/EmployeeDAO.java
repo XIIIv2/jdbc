@@ -25,14 +25,15 @@ public class EmployeeDAO {
         try (PreparedStatement pstmt = connector.getConnection().prepareStatement(query)) {
             pstmt.setInt(1, id);
             ResultSet resultSet = pstmt.executeQuery();
-            resultSet.next();
-            employee = new Employee(
-                    resultSet.getInt("id"),
-                    resultSet.getString("name"),
-                    resultSet.getInt("age"),
-                    resultSet.getString("position"),
-                    resultSet.getFloat("salary")
-            );
+            if (resultSet.next()) {
+                employee = new Employee(
+                        resultSet.getInt("id"),
+                        resultSet.getString("name"),
+                        resultSet.getInt("age"),
+                        resultSet.getString("position"),
+                        resultSet.getFloat("salary")
+                );
+            }
         } catch (SQLException e) {
             System.out.println("SQL Error: " + e.getMessage());
         }
